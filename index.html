@@ -1,0 +1,1352 @@
+<!--
+  Copyright 2026 Google LLC
+  SPDX-License-Identifier: Apache-2.0
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <title>홈카메라 AI 추론 데이터 보호 4단계 실증 시연</title>
+  <style>
+    :root {
+      /* UCC Google Cloud Light Color Palette */
+      --blue: #1a73e8;
+      --blue-500: #4285f4;
+      --blue-700: #1967d2;
+      --blue-50: #e8f0fe;
+      --blue-100: #d2e3fc;
+
+      --red: #ea4335;
+      --red-700: #c5221f;
+      --red-50: #fce8e6;
+
+      --yellow: #fbbc04;
+      --yellow-800: #b06000;
+      --yellow-50: #fef7e0;
+
+      --green: #34a853;
+      --green-700: #188038;
+      --green-50: #e6f4ea;
+
+      --purple: #7c3aed;
+      --purple-50: #f3e8ff;
+
+      --grey-900: #202124;
+      --grey-800: #3c4043;
+      --grey-700: #5f6368;
+      --grey-500: #9aa0a6;
+      --grey-300: #dadce0;
+      --grey-200: #e8eaed;
+      --grey-100: #f1f3f4;
+      --grey-50: #f8f9fa;
+
+      --bg: #ffffff;
+      --panel: #ffffff;
+      --panel-alt: #f8f9fa;
+      --border: #e8eaed;
+      --border-strong: #dadce0;
+      --text: #202124;
+      --muted: #5f6368;
+
+      --shadow-1: 0 1px 2px rgb(60 64 67 / .08), 0 1px 3px 1px rgb(60 64 67 / .05);
+      --shadow-2: 0 1px 3px rgb(60 64 67 / .10), 0 6px 18px -4px rgb(60 64 67 / .12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Google Sans", "Google Sans Text", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background:
+        radial-gradient(55% 45% at 88% 8%, rgb(66 133 244 / .08), transparent 70%),
+        radial-gradient(40% 40% at 92% 94%, rgb(52 168 83 / .06), transparent 70%),
+        var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      line-height: 1.58;
+      word-break: keep-all;
+      -webkit-font-smoothing: antialiased;
+    }
+    code {
+      font-family: "Roboto Mono", "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.88em;
+      background: var(--grey-100);
+      color: var(--grey-900);
+      padding: 0.1em 0.42em;
+      border-radius: 6px;
+    }
+
+    /* Sidebar (13-Slide Navigation Structure Preserved) */
+    aside {
+      width: 304px;
+      background: var(--grey-50);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: margin-left 0.25s ease;
+    }
+    body.hide-sidebar aside { margin-left: -304px; }
+    .brand {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+      background: #ffffff;
+    }
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--blue-700);
+      background: var(--blue-50);
+      border: 1px solid var(--blue-100);
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 9px;
+    }
+    .g-dots { display: inline-flex; gap: 3px; }
+    .g-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-500); }
+    .g-dots i:nth-child(2) { background: var(--red); }
+    .g-dots i:nth-child(3) { background: var(--yellow); }
+    .g-dots i:nth-child(4) { background: var(--green); }
+    .brand h1 { font-size: 16px; font-weight: 700; color: var(--grey-900); line-height: 1.35; letter-spacing: -0.01em; }
+
+    .nav-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    .nav-item {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--grey-700);
+      padding: 9px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .nav-item:hover { background: var(--grey-100); color: var(--grey-900); }
+    .nav-item.active {
+      background: var(--blue-50);
+      border-color: var(--blue-100);
+      color: var(--blue-700);
+      font-weight: 600;
+    }
+    .nav-num {
+      font-size: 12px;
+      min-width: 24px;
+      height: 22px;
+      border-radius: 6px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--grey-700);
+      font-weight: 700;
+    }
+    .nav-item.active .nav-num {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #ffffff;
+    }
+    .sidebar-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+      background: #ffffff;
+    }
+
+    /* Main Slide Stage */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    header.topbar {
+      height: 56px;
+      padding: 0 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgb(255 255 255 / .88);
+      backdrop-filter: saturate(180%) blur(14px);
+      flex-shrink: 0;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .icon-btn {
+      background: #ffffff;
+      border: 1px solid var(--border-strong);
+      color: var(--grey-800);
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .icon-btn:hover { background: var(--blue-50); border-color: var(--blue-100); color: var(--blue-700); }
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .progress-bar {
+      width: 160px;
+      height: 6px;
+      background: var(--grey-100);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+      transition: width 0.25s ease;
+    }
+
+    /* Slides */
+    .slide-viewport {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 36px 40px;
+    }
+    .slide {
+      display: none;
+      max-width: 1440px;
+      margin: 0 auto;
+      animation: fadeIn 0.2s ease;
+    }
+    .slide.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stage-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .pill-blue { background: var(--blue-50); color: var(--blue-700); border: 1px solid var(--blue-100); }
+    .pill-red { background: var(--red-50); color: var(--red-700); border: 1px solid #f6c7c3; }
+    .pill-amber { background: var(--yellow-50); color: var(--yellow-800); border: 1px solid #fde293; }
+    .pill-teal { background: var(--blue-50); color: var(--blue-700); border: 1px solid var(--blue-100); }
+    .pill-green { background: var(--green-50); color: var(--green-700); border: 1px solid #ceead6; }
+    .pill-purple { background: var(--purple-50); color: var(--purple); border: 1px solid #e9d5ff; }
+
+    .slide-title { font-size: 28px; font-weight: 700; color: var(--grey-900); margin-bottom: 10px; letter-spacing: -0.02em; }
+
+    .key-message {
+      background: linear-gradient(90deg, var(--blue-50), rgb(232 240 254 / .25));
+      border-left: 4px solid var(--blue);
+      padding: 13px 18px;
+      border-radius: 0 12px 12px 0;
+      font-size: 15.5px;
+      font-weight: 500;
+      color: var(--grey-900);
+      margin-bottom: 22px;
+    }
+    .key-message.danger {
+      background: linear-gradient(90deg, var(--red-50), rgb(252 232 230 / .25));
+      border-left-color: var(--red);
+    }
+    .key-message.success {
+      background: linear-gradient(90deg, var(--green-50), rgb(230 244 234 / .25));
+      border-left-color: var(--green);
+    }
+    .key-message.warn {
+      background: linear-gradient(90deg, var(--yellow-50), rgb(254 247 224 / .3));
+      border-left-color: var(--yellow);
+    }
+
+    /* Two-column media + explanation */
+    .split {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+    .media-card, .info-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow-1);
+    }
+    .media-card { box-shadow: var(--shadow-2); }
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: var(--grey-50);
+      border: 1px solid var(--border-strong);
+      color: var(--grey-700);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .tab-btn:hover { background: var(--grey-100); color: var(--grey-900); }
+    .tab-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #ffffff;
+      box-shadow: var(--shadow-1);
+    }
+    .media-pane { display: none; }
+    .media-pane.active { display: block; }
+    video, .slide-img {
+      width: 100%;
+      border-radius: 12px;
+      background: #0d1117;
+      border: 1px solid var(--border);
+      display: block;
+    }
+    .media-caption {
+      order: -1;
+      margin: 0 0 10px;
+      padding: 10px 14px;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--grey-900);
+      background: var(--blue-50);
+      border-left: 4px solid var(--blue);
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .media-caption code { background: #ffffff; color: var(--blue-700); }
+    .media-card { display: flex; flex-direction: column; }
+    .media-pane.active { display: flex; flex-direction: column; }
+    .badge-live {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--green-700);
+      background: var(--green-50);
+      padding: 3px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .badge-diagram {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--yellow-800);
+      background: var(--yellow-50);
+      padding: 3px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .info-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--grey-900);
+      margin-bottom: 12px;
+      padding-bottom: 9px;
+      border-bottom: 1px solid var(--border);
+    }
+    .step-list { list-style: none; margin-bottom: 14px; }
+    .step-list li {
+      position: relative;
+      padding-left: 28px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: var(--grey-800);
+    }
+    .step-list li .n {
+      position: absolute;
+      left: 0;
+      top: 2px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--blue-50);
+      border: 1px solid var(--blue-100);
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--blue-700);
+    }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .metric-box {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 13px;
+    }
+    .metric-label { font-size: 12px; color: var(--muted); }
+    .metric-val { font-size: 17px; font-weight: 700; color: var(--grey-900); margin-top: 2px; }
+
+    /* Tables */
+    table.matrix {
+      width: 100%;
+      border-collapse: collapse;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-1);
+      font-size: 14px;
+    }
+    table.matrix th, table.matrix td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    table.matrix th {
+      background: var(--grey-50);
+      color: var(--grey-700);
+      font-weight: 600;
+      font-size: 13px;
+    }
+    table.matrix tr:last-child td { border-bottom: none; }
+    .status-bad { color: var(--red-700); font-weight: 600; }
+    .status-warn { color: var(--yellow-800); font-weight: 600; }
+    .status-good { color: var(--green-700); font-weight: 600; }
+
+    .cards-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 18px;
+    }
+    .callout {
+      margin-top: 14px;
+      background: var(--yellow-50);
+      border: 1px solid #fde293;
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-size: 13px;
+      color: var(--grey-800);
+    }
+    .arch-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 20px 14px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-1);
+    }
+    @media (max-width: 1100px) {
+      .split { grid-template-columns: 1fr; }
+      .cards-3 { grid-template-columns: 1fr; }
+    }
+
+    /* Lightbox */
+    .media-card img, .slide-img { cursor: zoom-in; }
+    #lightbox { position: fixed; inset: 0; background: rgb(0 0 0 / .88); display: none; align-items: center; justify-content: center; z-index: 9999; cursor: zoom-out; padding: 24px; }
+    #lightbox.open { display: flex; }
+    #lightbox img { max-width: 96vw; max-height: 92vh; border-radius: 8px; box-shadow: 0 10px 40px rgb(0 0 0 / .5); background: #0d1117; }
+    #lightbox .lb-hint { position: fixed; top: 14px; right: 20px; color: #fff; font-size: 14px; opacity: .85; }
+  </style>
+</head>
+<body>
+  <aside>
+    <div class="brand">
+      <span class="brand-tag"><span class="g-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Confidential Computing</span>
+      <h1>홈카메라 AI 영상 보호<br/>4단계 공격·방어 실증 시연</h1>
+    </div>
+    <div class="nav-list" id="navList"></div>
+    <div class="sidebar-footer">
+      키보드 <strong>← / →</strong> 이동 · <strong>B</strong> 목차 토글 · <strong>F</strong> 전체화면
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" onclick="toggleSidebar()">☰ 목차</button>
+        <button class="icon-btn" onclick="toggleFullscreen()">⛶ 전체화면</button>
+      </div>
+      <div class="progress-wrap">
+        <button class="icon-btn" onclick="prevSlide()">← 이전</button>
+        <span id="slideCounter">1 / 13</span>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:8%"></div></div>
+        <button class="icon-btn" onclick="nextSlide()">다음 →</button>
+      </div>
+    </header>
+
+    <div class="slide-viewport">
+
+      <!-- Slide 1 -->
+      <section class="slide active" data-nav="개요 · 4단계 보안 구성 비교">
+        <span class="stage-pill pill-blue">Overview · 4단계 보안 구성 비교</span>
+        <h2 class="slide-title">누가 고객의 거실 영상을 볼 수 없게 되는가?</h2>
+        <div class="key-message">
+          동일한 AI 홈카메라 추론 서비스를 <strong>CVM(CPU 메모리 암호화)</strong>, <strong>GPU CC(GPU 기밀 컴퓨팅)</strong>, <strong>Confidential Space(증명 기반 키 통제)</strong> 적용 여부에 따라 4단계로 구성하고, 각 단계가 막아내는 위협 경계를 실증합니다.
+        </div>
+
+        <table class="matrix">
+          <thead>
+            <tr>
+              <th style="width:96px">단계</th>
+              <th style="width:310px">보안 설정 (CVM · GPU CC · Confidential Space)</th>
+              <th style="width:175px">클라우드 사업자 (Google)</th>
+              <th style="width:175px">서비스 운영자 (서버 root)</th>
+              <th>핵심 메시지</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Stage 1</strong></td>
+              <td><strong>CVM OFF · GPU CC OFF</strong><br/><span style="font-size:12.5px;color:var(--muted)">일반 GPU VM (메모리·전송 하드웨어 보호 미사용)</span></td>
+              <td class="status-bad">⭕ 볼 수 있음 (노출)</td>
+              <td class="status-bad">⭕ 볼 수 있음 (노출)</td>
+              <td>전송을 암호화해도 <strong>AI가 분석하는 순간 메모리에 원본 사진이 생성</strong>됨</td>
+            </tr>
+            <tr>
+              <td><strong>Stage 2</strong></td>
+              <td><strong>CVM ON · GPU CC OFF</strong><br/><span style="font-size:12.5px;color:var(--muted)">CPU 메모리만 보호, GPU 보호 미사용 (가상 비교)</span></td>
+              <td class="status-warn">⚠️ 전송 통로(PCIe) 노출</td>
+              <td class="status-bad">⭕ 볼 수 있음 (노출)</td>
+              <td>CPU만 지키면 GPU로 보내는 통로가 열림<br/><span style="display:inline-block;margin-top:4px;padding:2px 8px;border-radius:6px;background:var(--blue-50);color:var(--blue-700);font-size:12.5px;font-weight:600">ℹ️ Google Cloud G4는 CVM을 켜면 GPU CC가 자동으로 함께 켜짐</span></td>
+            </tr>
+            <tr>
+              <td><strong>Stage 3</strong></td>
+              <td><strong>CVM ON · GPU CC ON</strong><br/><span style="font-size:12.5px;color:var(--muted)">Confidential G4 VM (Confidential Space 미사용)</span></td>
+              <td class="status-good">❌ 볼 수 없음 (차단)</td>
+              <td class="status-bad">⭕ 볼 수 있음 (노출)</td>
+              <td><strong>클라우드 사업자는 막았지만</strong>, 서버 안에 들어온 운영자에게는 CPU가 복호화해 보여줌</td>
+            </tr>
+            <tr style="background: rgb(230 244 234 / .35)">
+              <td><strong style="color:var(--green-700)">Stage 4</strong></td>
+              <td><strong style="color:var(--green-700)">CVM ON · GPU CC ON + Confidential Space</strong><br/><span style="font-size:12.5px;color:var(--green-700)">원격 증명 기반 Cloud KMS 복호화 키 통제 결합</span></td>
+              <td class="status-good">❌ 볼 수 없음 (차단)</td>
+              <td class="status-good">❌ 볼 수 없음 (차단)</td>
+              <td>키는 검증된 정품 코드에만 지급됨 — <strong>고객 외에는 운영자도, Google도 볼 수 없음</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="cards-3">
+          <div class="info-card">
+            <h3>실증 하드웨어 환경</h3>
+            <p style="font-size:14px;color:var(--muted)">Google Cloud 서울 리전(<code>asia-northeast3</code>) <code>g4-standard-48</code> 인스턴스 — <strong>AMD EPYC Turin (AMD SEV)</strong> + <strong>NVIDIA RTX PRO 6000 Blackwell Server Edition (96GB)</strong></p>
+          </div>
+          <div class="info-card">
+            <h3>100% 실제 구동 녹화 원칙</h3>
+            <p style="font-size:14px;color:var(--muted)">시뮬레이션 로그가 아닌 실제 서버 SSH 진입·메모리 스캔·NVIDIA 원격 증명(NRAS)·Cloud KMS 토큰 거부를 그대로 녹화했습니다. 클라우드 위에서 재현 불가능한 호스트 영역만 '설명용 그림'으로 명시해 구분합니다.</p>
+          </div>
+          <div class="info-card">
+            <h3>프라이버시 &amp; 합성 데이터</h3>
+            <p style="font-size:14px;color:var(--muted)">시연에 사용된 홈카메라 영상(300프레임)은 AI로 생성한 가상 거실 이미지(<code>DEMO - SYNTHETIC DATA</code> 워터마크 표기)이며 실제 고객 데이터를 포함하지 않습니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 2 (Fixed Architecture Flow: Camera -> AI Server <-> Cloud KMS -> Event Log) -->
+      <section class="slide" data-nav="아키텍처 · 암호화 추론 파이프라인">
+        <span class="stage-pill pill-teal">Architecture · 공통 시연 파이프라인</span>
+        <h2 class="slide-title">무저장(Stateless) 실시간 암호화 홈카메라 추론 파이프라인</h2>
+        <div class="key-message">
+          고객 카메라는 암호문 영상을 AI 추론 서버로 직접 전송하며, AI 추론 서버가 Cloud KMS로부터 복호화 키(DEK)를 메모리로 받아 영상을 분석한 뒤 결과만 출력합니다.
+        </div>
+
+        <div class="arch-card">
+          <svg viewBox="0 0 1120 265" width="100%" height="auto" role="img" aria-label="홈카메라 시뮬레이터가 암호문 스트림을 AI 추론 서버로 직접 보내고, AI 추론 서버가 Cloud KMS에 증명 토큰으로 대칭키 언래핑을 요청해 키를 받아 메모리 안에서만 복호화 및 추론한 뒤 이벤트 로그로 결과만 출력하는 아키텍처">
+            <defs>
+              <marker id="arr-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#1a73e8"/></marker>
+              <marker id="arr-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#188038"/></marker>
+              <marker id="arr-y" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#b06000"/></marker>
+            </defs>
+
+            <!-- Camera Client -->
+            <rect x="20" y="16" width="250" height="98" rx="14" fill="#f8f9fa" stroke="#dadce0" stroke-width="1.5"/>
+            <text x="145" y="46" text-anchor="middle" font-size="15.5" font-weight="700" fill="#202124">📷 홈카메라 시뮬레이터</text>
+            <text x="145" y="72" text-anchor="middle" font-size="12.5" fill="#5f6368">1280×720 · 10 fps 프레임별</text>
+            <text x="145" y="92" text-anchor="middle" font-size="12.5" fill="#5f6368">AES-256-GCM 암호화 전송</text>
+
+            <!-- Direct Arrow: Camera -> AI Server -->
+            <line x1="270" y1="65" x2="398" y2="65" stroke="#1a73e8" stroke-width="2.5" marker-end="url(#arr-b)"/>
+            <rect x="282" y="32" width="108" height="22" rx="11" fill="#e8f0fe"/>
+            <text x="336" y="47" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1967d2">① 암호문 스트림</text>
+            <text x="336" y="85" text-anchor="middle" font-size="11.5" fill="#5f6368">서버로 직접 전송</text>
+
+            <!-- AI Inference Server -->
+            <rect x="406" y="10" width="328" height="110" rx="16" fill="#e8f0fe" stroke="#1a73e8" stroke-width="2"/>
+            <text x="570" y="40" text-anchor="middle" font-size="16" font-weight="700" fill="#202124">🖥 AI 추론 서버 (RTX PRO 6000)</text>
+            <text x="570" y="66" text-anchor="middle" font-size="13" fill="#3c4043">수신한 암호문을 메모리(RAM)에서만 복호화</text>
+            <text x="570" y="86" text-anchor="middle" font-size="13" fill="#3c4043">PyTorch 객체 인식 (최근 30장 링 버퍼)</text>
+            <text x="570" y="106" text-anchor="middle" font-size="12" font-weight="600" fill="#188038">디스크·버킷 영상 저장 0 바이트</text>
+
+            <!-- Arrow: AI Server -> Event Log -->
+            <line x1="734" y1="65" x2="852" y2="65" stroke="#188038" stroke-width="2.5" marker-end="url(#arr-g)"/>
+            <rect x="746" y="32" width="98" height="22" rx="11" fill="#e6f4ea"/>
+            <text x="795" y="47" text-anchor="middle" font-size="11.5" font-weight="600" fill="#188038">④ 결과만 출력</text>
+            <text x="795" y="85" text-anchor="middle" font-size="11.5" fill="#5f6368">원본 프레임 폐기</text>
+
+            <!-- Event Log -->
+            <rect x="860" y="16" width="240" height="98" rx="14" fill="#f8f9fa" stroke="#dadce0" stroke-width="1.5"/>
+            <text x="980" y="46" text-anchor="middle" font-size="15.5" font-weight="700" fill="#202124">📊 이벤트 로그</text>
+            <text x="980" y="73" text-anchor="middle" font-size="12.5" font-family="Roboto Mono, monospace" fill="#3c4043">FRAME #00153 person (1.00)</text>
+            <text x="980" y="93" text-anchor="middle" font-size="12" fill="#5f6368">원본 영상 미포함</text>
+
+            <!-- Round-trip Key Unwrap: AI Server <-> Cloud KMS -->
+            <line x1="530" y1="120" x2="530" y2="176" stroke="#b06000" stroke-width="2.2" stroke-dasharray="5,4" marker-end="url(#arr-y)"/>
+            <text x="514" y="148" text-anchor="end" font-size="12" font-weight="600" fill="#b06000">② 키 언래핑 요청 (증명 토큰 제시)</text>
+            <text x="514" y="165" text-anchor="end" font-size="11.5" fill="#5f6368">감싸진 대칭키(Wrapped DEK) 전달</text>
+
+            <line x1="610" y1="182" x2="610" y2="128" stroke="#188038" stroke-width="2.4" marker-end="url(#arr-g)"/>
+            <text x="626" y="148" text-anchor="start" font-size="12" font-weight="600" fill="#188038">③ 복호화 키(DEK) 메모리로 반환</text>
+            <text x="626" y="165" text-anchor="start" font-size="11.5" fill="#5f6368">조건 불일치 시 403 거부</text>
+
+            <!-- Cloud KMS Box -->
+            <rect x="385" y="184" width="370" height="72" rx="14" fill="#fef7e0" stroke="#fbbc04" stroke-width="1.8"/>
+            <text x="570" y="213" text-anchor="middle" font-size="15.5" font-weight="700" fill="#202124">🔑 Cloud KMS &amp; Workload Identity Pool</text>
+            <text x="570" y="238" text-anchor="middle" font-size="12.5" fill="#3c4043">영상이 아닌 '복호화 키'만 관리 · Stage 4에서 5대 증명 조건 통과 코드에만 키 불출</text>
+          </svg>
+        </div>
+
+        <div class="split">
+          <div class="media-card">
+            <img class="slide-img" src="assets/00_camera_stream_preview.jpg" alt="00_camera_stream_preview 핵심 장면" />
+            <div class="media-caption">
+              <span>시연 입력 원본 스트림 (카메라 암호화 전 화면 미리보기 · 300프레임 루프)</span>
+              <span class="badge-live">합성 테스트 영상</span>
+            </div>
+          </div>
+          <div class="info-card">
+            <h3>시연 과정 설명</h3>
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">왜 카메라에서 암호화해서 보내는가?</p>
+            <ul class="step-list">
+              <li><span class="n">1</span>카메라가 평문으로 영상을 보내면 복호화 키가 필요 없으므로, Stage 4에서 <strong>인증받지 않은 백도어 컨테이너를 띄워도 평문 영상을 그대로 받아 유출</strong>할 수 있게 됩니다.</li>
+              <li><span class="n">2</span>반면 카메라가 암호화해서 보내고 <strong>"검증된 정품 코드에만 Cloud KMS가 복호화 키를 반환"</strong>하면, 다른 코드는 영상을 받아도 암호문뿐이라 열람할 수 없습니다.</li>
+              <li><span class="n">3</span>동시에 정품 서버는 AI 추론을 위해 메모리에서 복호화를 수행하므로, Stage 1·3에서는 <strong>"전송·저장을 암호화해도 연산 중인 메모리(Data-in-use)에서 원본이 노출된다"</strong>는 위협을 정확히 보여줍니다.</li>
+            </ul>
+            <div class="callout">
+              <strong>실증 포인트:</strong> 모든 프레임(1~300번)의 암호화 전 원본 SHA-256 해시를 사전 기록해 두어, 메모리에서 추출된 이미지가 원본과 1바이트의 오차도 없이 일치하는지 대조합니다.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 3 -->
+      <section class="slide" data-nav="Stage 1 [CVM OFF·GPU CC OFF] 추론">
+        <span class="stage-pill pill-red">Stage 1 [CVM OFF · GPU CC OFF] · 보호 상태 점검 및 실시간 추론</span>
+        <h2 class="slide-title">CVM·GPU CC를 모두 끈 상태에서의 실시간 영상 추론</h2>
+        <div class="key-message">
+          영상은 암호화되어 네트워크로 들어오고 디스크에는 아무것도 저장하지 않지만, AI가 분석하는 동안 서버 메모리에는 복호화된 사진이 놓입니다.
+        </div>
+
+        <div class="split">
+          <div>
+          <div class="media-card" data-tabs>
+            <div class="tab-bar">
+              <button class="tab-btn active" onclick="switchTab(this, 0)">🎥 보호 상태 점검 (CVM OFF · GPU CC OFF)</button>
+              <button class="tab-btn" onclick="switchTab(this, 1)">🎥 실시간 암호문 수신 &amp; GPU 추론</button>
+            </div>
+            <div class="media-pane active">
+              <img class="slide-img" src="assets/1_1_protection_status.jpg" alt="1_1_protection_status 핵심 장면" />
+              <div class="media-caption">
+                <span>일반 <code>g4-standard-48</code>: CVM(SEV) 미적용, GPU <code>CC status: OFF</code></span>
+                <span class="badge-live">실제 서버 녹화 · 핵심 장면</span>
+              </div>
+            </div>
+            <div class="media-pane">
+              <img class="slide-img" src="assets/1_2_live_inference.jpg" alt="1_2_live_inference 핵심 장면" />
+              <div class="media-caption">
+                <span>상단: 카메라 암호문 전송(10 fps) / 좌측 하단: 메모리 복호화 후 RTX PRO 6000 추론</span>
+                <span class="badge-live">실제 서버 녹화 · 핵심 장면</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card" style="margin-top:18px">
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0">📊 Stage 1 [CVM OFF · GPU CC OFF] 확인 결과</p>
+            <div class="metric-grid" style="grid-template-columns:repeat(2,1fr)">
+              <div class="metric-box">
+                <div class="metric-label">CVM / GPU CC 상태</div>
+                <div class="metric-val" style="color:var(--red-700)">OFF / OFF</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-label">디스크 평문 저장</div>
+                <div class="metric-val" style="color:var(--blue-700)">0 바이트</div>
+              </div>
+            </div>
+          </div>
+          </div>
+
+          <div class="info-card">
+            <h3>시연 과정 설명</h3>
+            <div data-tab-desc="0">
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">🎥 보호 상태 점검 (좌측 하단 AI SERVER 창)</p>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>CVM OFF 확인:</strong> 커널 로그(<code>dmesg</code>)에 메모리 암호화 항목이 없어 <code>No CPU memory encryption (Standard VM)</code>이 출력됩니다. → CPU 메모리(RAM)가 평문 상태입니다.</li>
+              <li><span class="n">2</span><strong>GPU CC OFF 확인:</strong> <code>nvidia-smi conf-compute -f</code> 결과 <code>CC status: OFF</code>가 출력됩니다. → CPU↔GPU 전송 구간과 GPU 메모리에 하드웨어 보호가 없습니다.</li>
+              <li><span class="n">3</span><strong>CPU→GPU 평문 복사 확인:</strong> 테스트 데이터를 CPU 메모리에서 GPU로 복사합니다. → 암호화 경로(바운스 버퍼) 없이 평문 그대로 GPU로 전달됩니다. Stage 3에서는 같은 복사가 암호화 경로를 거칩니다.</li>
+            </ul>
+            <p style="font-size:13px;color:var(--muted);margin:4px 0 0">※ 상단 CAMERA 창: 점검 중에도 카메라는 암호화 프레임(<code>encrypted</code>)을 계속 전송 중 — "전송은 암호화, 서버는 무방비" 상태</p>
+            </div>
+            <div data-tab-desc="1" style="display:none">
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">🎥 실시간 암호문 수신 &amp; GPU 추론</p>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>암호문 전송 (상단 CAMERA 창):</strong> 카메라가 프레임마다 AES-256-GCM으로 암호화한 약 147KB 데이터를 초당 10장씩 보냅니다. 모든 줄에 <code>(encrypted)</code>가 표시됩니다. <span style="color:var(--muted);font-size:13px">※ 카메라 창은 10프레임마다 1줄씩 요약 출력하므로, 매 프레임을 출력하는 서버 창보다 번호가 띄엄띄엄 보입니다.</span></li>
+              <li><span class="n">2</span><strong>메모리 복호화 → GPU 추론 (좌측 AI SERVER 창):</strong> 서버는 받은 암호문을 RAM 안에서만 복호화해 RTX PRO 6000에서 객체 인식을 수행하고, <code>FRAME #00297 person x1 (1.00)</code>처럼 결과만 한 줄씩 출력합니다.</li>
+              <li><span class="n">3</span><strong>무저장 구조:</strong> 원본 영상은 디스크·버킷에 저장하지 않고(0 바이트), 최근 30장만 메모리에 잠시 보관했다가 덮어씁니다.</li>
+              <li><span class="n">4</span><strong>운영자 대기 (우측 SERVICE OPERATOR 창):</strong> 서버 관리 권한을 가진 운영자가 대기 중인 상태입니다. 다음 슬라이드에서 이 운영자가 서버 메모리를 읽습니다.</li>
+            </ul>
+            <div class="callout">
+              <strong>포인트:</strong> 전송도 암호화, 디스크 저장도 없는 "안전해 보이는" 구조지만, AI가 분석하는 순간에는 <strong>복호화된 원본 사진이 서버 메모리에 존재</strong>합니다.
+            </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4 -->
+      <section class="slide" data-nav="Stage 1 [CVM OFF·GPU CC OFF] 메모리 노출">
+        <span class="stage-pill pill-red">Stage 1 [CVM OFF · GPU CC OFF] · 서비스 운영자 메모리 스캔 공격</span>
+        <h2 class="slide-title">서버 운영자가 메모리를 읽자 고객의 거실이 그대로 노출됨</h2>
+        <div class="key-message danger">
+          "전송 중 암호화(TLS/AES)와 무저장 구조를 적용했더라도, 연산 중인 프로세스 메모리를 읽으면 원본 사진이 100% 그대로 복원됩니다."
+        </div>
+
+        <div class="split">
+          <div class="media-card">
+            <img class="slide-img" src="assets/1_3_operator_memdump.jpg" alt="1_3_operator_memdump 핵심 장면" />
+            <div class="media-caption">
+              <span>우측 패널: 서비스 운영자가 SSH 진입 후 추론 프로세스 메모리(2,021 MiB) 스캔 → 원본 거실 사진 즉시 팝업</span>
+              <span class="badge-live">실제 서버 녹화 · 핵심 장면</span>
+            </div>
+          </div>
+          <div class="info-card">
+            <h3>시연 과정 설명</h3>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>서비스 운영자 접속:</strong> 서버 관리자 권한을 가진 운영자가 실행 중인 AI 추론 서버(<code>ai-server-1</code>)에 SSH로 접속합니다.</li>
+              <li><span class="n">2</span><strong>실시간 프로세스 메모리 스캔:</strong> 추론 프로세스(<code>PID 34357</code>)의 익명 힙 메모리 약 2.0 GB를 스캔하여 JPEG 세그먼트(<code>FF D8 FF</code> ~ <code>FF D9</code>)를 추출합니다.</li>
+              <li><span class="n">3</span><strong>원본 지문 100% 일치 확인:</strong> 최근 링 버퍼에 있던 프레임들이 온전한(<code>COMPLETE</code>) 상태로 추출되며, 사전 기록된 원본 프레임 SHA-256 해시와 <strong>100% 일치</strong>함이 확인됩니다.</li>
+              <li><span class="n">4</span><strong>거실 화면 노출:</strong> 추출된 파일을 열자 고객 거실 화면(<code>CAM-01 LIVING ROOM</code>)이 선명하게 나타납니다.</li>
+            </ul>
+            <div class="callout">
+              <strong>시사점:</strong> 일반 클라우드 VM에서는 서비스 운영자뿐만 아니라 호스트 인프라 계층(클라우드 사업자) 역시 물리 메모리에 접근할 수 있는 신뢰 경계 안에 놓여 있습니다.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 5 -->
+      <section class="slide" data-nav="Stage 2 [CVM ON·GPU CC OFF] 경로 한계">
+        <span class="stage-pill pill-amber">Stage 2 [CVM ON · GPU CC OFF] · 반쪽 보호 구성의 한계 (아키텍처 비교)</span>
+        <h2 class="slide-title">만약 CVM만 켜고 GPU CC가 꺼져 있다면?</h2>
+        <div class="key-message warn">
+          "CPU 메모리(CVM)만 암호화하면 GPU로 데이터를 넘기는 공유 통로에서 평문이 노출됩니다. Google Cloud Confidential G4는 CVM과 GPU CC가 항상 함께 켜져 이 반쪽 상태를 원천 차단합니다."
+        </div>
+
+        <div class="split">
+          <div class="media-card">
+            <svg viewBox="0 0 1000 560" width="100%" height="auto" role="img" aria-label="위: 가상 Stage 2 CVM ON GPU CC OFF 구성에서 CPU 메모리는 암호화되지만 바운스 버퍼와 PCIe 구간에서 평문이 노출되고 GPU는 보호 영역이 없음. 아래: 실제 GCP Stage 3 CVM ON GPU CC ON 구성에서 CPU 메모리, 전송 구간, GPU 내부가 모두 보호됨" style="font-family:'Google Sans','Noto Sans KR',sans-serif">
+              <defs>
+                <marker id="s2-arr-r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,1 L9,5 L0,9 z" fill="#c5221f"/></marker>
+                <marker id="s2-arr-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,1 L9,5 L0,9 z" fill="#188038"/></marker>
+              </defs>
+
+              <!-- Row 1: Hypothetical Stage 2 -->
+              <rect x="6" y="6" width="988" height="262" rx="16" fill="#fff8f7" stroke="#f6c7c3" stroke-width="1.5"/>
+              <text x="28" y="44" font-size="20" font-weight="700" fill="#c5221f">가상 비교 · Stage 2 [CVM ON · GPU CC OFF]</text>
+              <text x="28" y="72" font-size="16" fill="#3c4043">CPU 메모리만 암호화 → GPU로 넘기는 통로에서 평문 노출</text>
+
+              <rect x="28" y="96" width="270" height="148" rx="14" fill="#e6f4ea" stroke="#34a853" stroke-width="2"/>
+              <text x="163" y="134" text-anchor="middle" font-size="18" font-weight="700" fill="#137333">✔ CPU 메모리 (CVM)</text>
+              <text x="163" y="170" text-anchor="middle" font-size="16" font-weight="600" fill="#202124">CPU 하드웨어 키로 암호화</text>
+              <text x="163" y="200" text-anchor="middle" font-size="14.5" fill="#3c4043">단, GPU는 이 키를 알지 못함</text>
+
+              <line x1="300" y1="170" x2="360" y2="170" stroke="#c5221f" stroke-width="3" marker-end="url(#s2-arr-r)"/>
+
+              <rect x="366" y="96" width="270" height="148" rx="14" fill="#fce8e6" stroke="#ea4335" stroke-width="2.5"/>
+              <text x="501" y="134" text-anchor="middle" font-size="18" font-weight="700" fill="#c5221f">✘ 바운스 버퍼 &amp; PCIe</text>
+              <text x="501" y="170" text-anchor="middle" font-size="16" font-weight="600" fill="#202124">암호화가 풀린 평문 프레임 이동</text>
+              <text x="501" y="200" text-anchor="middle" font-size="14.5" fill="#3c4043">호스트·하이퍼바이저에서</text>
+              <text x="501" y="222" text-anchor="middle" font-size="14.5" fill="#3c4043">평문 노출 위험</text>
+
+              <line x1="638" y1="170" x2="698" y2="170" stroke="#c5221f" stroke-width="3" marker-end="url(#s2-arr-r)"/>
+
+              <rect x="704" y="96" width="270" height="148" rx="14" fill="#fce8e6" stroke="#ea4335" stroke-width="2.5"/>
+              <text x="839" y="134" text-anchor="middle" font-size="18" font-weight="700" fill="#c5221f">✘ 일반 GPU (CC OFF)</text>
+              <text x="839" y="170" text-anchor="middle" font-size="16" font-weight="600" fill="#202124">보호 영역(CPR) 없음</text>
+              <text x="839" y="200" text-anchor="middle" font-size="14.5" fill="#3c4043">외부의 GPU 메모리 접근</text>
+              <text x="839" y="222" text-anchor="middle" font-size="14.5" fill="#3c4043">차단 장치 없음</text>
+
+              <!-- Row 2: Actual GCP Stage 3 -->
+              <rect x="6" y="290" width="988" height="262" rx="16" fill="#f6fbf7" stroke="#ceead6" stroke-width="1.5"/>
+              <text x="28" y="328" font-size="20" font-weight="700" fill="#137333">실제 GCP Confidential G4 · Stage 3 [CVM ON · GPU CC ON]</text>
+              <text x="28" y="356" font-size="16" fill="#3c4043">CVM과 GPU CC가 항상 함께 켜짐 → 전 구간 보호</text>
+
+              <rect x="28" y="380" width="270" height="148" rx="14" fill="#e6f4ea" stroke="#34a853" stroke-width="2"/>
+              <text x="163" y="418" text-anchor="middle" font-size="18" font-weight="700" fill="#137333">✔ CPU 메모리 (CVM)</text>
+              <text x="163" y="454" text-anchor="middle" font-size="16" font-weight="600" fill="#202124">CPU 하드웨어 키로 암호화</text>
+              <text x="163" y="484" text-anchor="middle" font-size="14.5" fill="#3c4043">전송 전 GPU 세션 키(SPDM)로</text>
+              <text x="163" y="506" text-anchor="middle" font-size="14.5" fill="#3c4043">다시 암호화</text>
+
+              <line x1="300" y1="454" x2="360" y2="454" stroke="#188038" stroke-width="3" marker-end="url(#s2-arr-g)"/>
+
+              <rect x="366" y="380" width="270" height="148" rx="14" fill="#e6f4ea" stroke="#34a853" stroke-width="2"/>
+              <text x="501" y="418" text-anchor="middle" font-size="18" font-weight="700" fill="#137333">✔ 바운스 버퍼 &amp; PCIe</text>
+              <text x="501" y="454" text-anchor="middle" font-size="16" font-weight="600" fill="#202124">AES-256-GCM 암호문만 이동</text>
+              <text x="501" y="484" text-anchor="middle" font-size="14.5" fill="#3c4043">호스트에는 암호문만 보임</text>
+
+              <line x1="638" y1="454" x2="698" y2="454" stroke="#188038" stroke-width="3" marker-end="url(#s2-arr-g)"/>
+
+              <rect x="704" y="380" width="270" height="148" rx="14" fill="#e6f4ea" stroke="#34a853" stroke-width="2"/>
+              <text x="839" y="418" text-anchor="middle" font-size="18" font-weight="700" fill="#137333">✔ RTX PRO 6000 (CC ON)</text>
+              <text x="839" y="454" text-anchor="middle" font-size="16" font-weight="600" fill="#202124">GPU 내부에서만 복호화</text>
+              <text x="839" y="484" text-anchor="middle" font-size="14.5" fill="#3c4043">보호 영역(CPR) 격리</text>
+              <text x="839" y="506" text-anchor="middle" font-size="14.5" fill="#3c4043">디버거(CUPTI) 연결 차단</text>
+            </svg>
+            <div style="margin-top:12px;padding:12px 16px;background:var(--grey-50);border:1px solid var(--border);border-radius:10px;font-size:13.5px;line-height:1.65;color:var(--grey-800)">
+              <div><strong>※ 바운스 버퍼 (Bounce Buffer):</strong> CVM의 암호화된 메모리는 GPU 같은 외부 장치가 직접 읽을 수 없기 때문에, CPU와 GPU가 데이터를 주고받으려고 따로 마련한 <strong>공유 메모리 영역</strong>입니다. 데이터는 이곳을 거쳐서만 GPU로 넘어갑니다.</div>
+              <div><strong>※ PCIe (PCI Express):</strong> 서버 안에서 CPU와 GPU를 연결하는 <strong>고속 데이터 통로(버스)</strong>입니다.</div>
+              <div><strong>※ CPR (Compute Protected Region):</strong> GPU CC가 켜졌을 때 GPU 메모리 안에 만들어지는 <strong>하드웨어 보호 영역</strong>입니다. 호스트·하이퍼바이저 등 외부에서 이 영역을 읽을 수 없습니다.</div>
+            </div>
+            <div class="media-caption">
+              <span>위: 가상 Stage 2 [CVM ON · GPU CC OFF] — 전송 통로 평문 노출 / 아래: 실제 GCP Stage 3 [CVM ON · GPU CC ON] — 전 구간 보호</span>
+              <span class="badge-diagram">설명용 아키텍처 그림</span>
+            </div>
+          </div>
+          <div class="info-card">
+            <h3>시연 과정 설명</h3>
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">왜 반쪽 구성을 허용하지 않는가?</p>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>CPU 전용 키의 한계:</strong> CVM(AMD SEV)은 CPU RAM을 VM 고유 키로 암호화하지만, 외장 PCIe 장치인 GPU는 CPU 내부의 메모리 암호화 키를 공유받지 못합니다.</li>
+              <li><span class="n">2</span><strong>공유 바운스 버퍼 경유 필수:</strong> 따라서 CPU가 GPU로 영상 텐서를 보낼 때는 반드시 암호화되지 않은 공유 메모리(SWIOTLB 바운스 버퍼)와 PCIe 버스를 거쳐야 합니다.</li>
+              <li><span class="n">3</span><strong>NVIDIA GPU CC의 역할:</strong> GPU CC가 켜지면 드라이버와 GPU가 암호화 세션(SPDM)을 맺고, <strong>바운스 버퍼에 넣기 전에 AES-256-GCM으로 재암호화</strong>하여 전송합니다. GPU 내부 메모리는 하드웨어 보호 영역(CPR)으로 외부 접근을 차단합니다.</li>
+            </ul>
+            <div class="callout">
+              Google Cloud에서 <code>g4-standard-48</code>에 CVM을 활성화하면 GPU 역시 자동으로 <code>CC State: ON</code> 상태로 연결됩니다.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 6 -->
+      <section class="slide" data-nav="Stage 3 [CVM ON·GPU CC ON] 활성화 확인">
+        <span class="stage-pill pill-teal">Stage 3 [CVM ON · GPU CC ON] · 하드웨어 보호 활성화 확인</span>
+        <h2 class="slide-title">옵션 하나로 CPU 메모리(CVM)와 GPU 전송 구간(GPU CC) 동시 암호화</h2>
+        <div class="key-message">
+          <code>--confidential-compute-type=SEV</code> 옵션 하나로 CVM(AMD SEV)과 RTX PRO 6000 GPU CC가 동시에 활성화되며, 애플리케이션 코드 변경 없이 동일한 AI 추론 서비스가 그대로 동작합니다.
+        </div>
+
+        <div class="split">
+          <div class="media-card" data-tabs>
+            <div class="tab-bar">
+              <button class="tab-btn active" onclick="switchTab(this, 0)">🎥 ① 서버 생성 및 CVM(SEV) 적용 확인</button>
+              <button class="tab-btn" onclick="switchTab(this, 1)">🎥 ② 서버 내부에서 CVM · GPU CC ON 확인</button>
+            </div>
+            <div class="media-pane active">
+              <img class="slide-img" src="assets/3_1_create_cvm.jpg" alt="3_1_create_cvm 핵심 장면" />
+              <div class="media-caption">
+                <span>일반 G4 생성 명령에 <code>--confidential-compute-type=SEV</code> 옵션만 추가 → <code>confidentialInstanceType: SEV</code> 확인 (GPU CC ON은 ② 영상에서 확인)</span>
+                <span class="badge-live">실제 서버 녹화 · 핵심 장면</span>
+              </div>
+            </div>
+            <div class="media-pane">
+              <img class="slide-img" src="assets/3_2_protection_status.jpg" alt="3_2_protection_status 핵심 장면" />
+              <div class="media-caption">
+                <span><code>Memory Encryption Features active: AMD SEV</code>, <code>DMA bounce buffers</code>, <code>CC State: ON</code> 확인</span>
+                <span class="badge-live">실제 서버 녹화 · 핵심 장면</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <h3>시연 과정 설명</h3>
+            <div data-tab-desc="0">
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">🎥 ① 서버 생성 및 CVM(SEV) 적용 확인</p>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>옵션 하나만 추가:</strong> Stage 1과 같은 <code>gcloud compute instances create</code> 명령에 <code>--confidential-compute-type=SEV</code>만 추가합니다. GPU 관련 옵션은 넣지 않습니다.</li>
+              <li><span class="n">2</span><strong>CVM 적용 확인:</strong> 생성 후 <code>describe</code> 결과 <code>confidentialInstanceType: SEV</code>, <code>cpuPlatform: AMD Turin</code>이 출력됩니다. → CVM으로 생성되었습니다.</li>
+              <li><span class="n">3</span><strong>GPU CC는 ② 탭에서 확인:</strong> GPU CC가 실제로 켜졌는지는 VM 내부에서만 확인할 수 있으므로 다음 탭에서 검증합니다.</li>
+            </ul>
+            <div class="callout"><strong>참고:</strong> G4에서는 CVM을 켜면 GPU CC가 별도 옵션 없이 자동으로 함께 켜집니다. (VM 내부의 CC 지원 드라이버 설정은 필요)</div>
+            </div>
+            <div data-tab-desc="1" style="display:none">
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">🎥 ② 서버 내부에서 CVM · GPU CC ON 확인</p>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>CVM ON 확인:</strong> 커널 로그(<code>dmesg</code>)에 <code>Memory Encryption Features active: AMD SEV</code>와 <code>DMA bounce buffers</code> 사용이 출력됩니다. → CPU 메모리가 암호화되어 있습니다.</li>
+              <li><span class="n">2</span><strong>GPU CC ON 확인:</strong> <code>nvidia-smi conf-compute -q</code> 결과 <code>CC State: ON</code>, <code>CPU CC Capabilities: AMD SEV</code>, <code>CC GPUs Ready State: Ready</code>가 출력됩니다. → GPU CC가 켜져 있고 사용 가능한 상태입니다.</li>
+              <li><span class="n">3</span><strong>CPU↔GPU 전송 암호화 경로:</strong> CVM과 GPU CC가 함께 켜지면 CPU→GPU 데이터는 CPU에서 AES-256-GCM 암호화 → 바운스 버퍼 → GPU 내부 복호화 경로로만 전달됩니다.</li>
+            </ul>
+            <div class="callout">오른쪽 <strong>STAGE 3 CHECK RESULT</strong> 창은 왼쪽 실제 출력이 나온 시점에 맞춰 결과를 요약해 보여줍니다.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 7 -->
+      <section class="slide" data-nav="Stage 3 [CVM ON·GPU CC ON] 원격 증명">
+        <span class="stage-pill pill-teal">Stage 3 [CVM ON · GPU CC ON] · NVIDIA GPU 하드웨어 원격 증명</span>
+        <h2 class="slide-title">연결된 GPU가 진짜 GPU CC 활성 상태인지 하드웨어 서명으로 검증</h2>
+        <div class="key-message">
+          매번 새로 만드는 1회용 확인 숫자(nonce)를 넣어 GPU 칩이 서명한 증명 응답을 NVIDIA 증명 서버(NRAS)로 검증하며, 하나라도 어긋나면 고객 데이터 키를 요청하지 않습니다.
+        </div>
+
+        <div class="split">
+          <div class="media-card" data-tabs>
+            <div class="tab-bar">
+              <button class="tab-btn active" onclick="switchTab(this, 0)">🎥 Scene A 정품 GPU 통과(PASS) &amp; Scene B 응답 재사용 거부</button>
+              <button class="tab-btn" onclick="switchTab(this, 1)">🎥 Scene C GPU CC OFF(Stage 1 서버) 증명 거부</button>
+            </div>
+            <div class="media-pane active">
+              <img class="slide-img" src="assets/3_3_gpu_attest.jpg" alt="3_3_gpu_attest 핵심 장면" />
+              <div class="media-caption">
+                <span>Scene A: 정품 Blackwell GPU 전체 항목 PASS → Scene B: 예전 응답 재사용 시 <code>NONCE_NOT_MATCHING</code>으로 즉시 거부</span>
+                <span class="badge-live">실제 서버 녹화 · 핵심 장면</span>
+              </div>
+            </div>
+            <div class="media-pane">
+              <img class="slide-img" src="assets/1_4_gpu_attest_cc_off.jpg" alt="1_4_gpu_attest_cc_off 핵심 장면" />
+              <div class="media-caption">
+                <span>Scene C: GPU CC가 꺼진 일반 G4(Stage 1)에서 증명 시도 시 하드웨어 증거 수집 단계에서 즉시 거부</span>
+                <span class="badge-live">실제 서버 녹화 · 핵심 장면</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <h3>시연 과정 설명</h3>
+            <div data-tab-desc="0">
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">🎥 Scene A 정품 GPU 통과 &amp; Scene B 응답 재사용 거부</p>
+            <ul class="step-list">
+              <li><span class="n">A</span><strong>정품 GPU CC ON (통과):</strong> 새 1회용 확인 숫자(<code>nonce</code>)로 GPU에 서명된 증거를 요청해 NVIDIA 증명 서버(NRAS)에 제출합니다. 인증서 체인(Blackwell 칩 고유 키 → NVIDIA 루트), 서명, <code>nonce</code> 일치, 드라이버(<code>595.58.03</code>)·VBIOS 기준값(RIM)이 모두 <code>True</code> → <strong>PASS</strong>.</li>
+              <li><span class="n">B</span><strong>예전 응답 재사용 공격 (거부):</strong> Scene A에서 통과했던 진짜 응답을 저장해 두었다가 새 요청에 끼워 넣습니다. NVIDIA가 <code>nonce</code> 불일치(<code>NONCE_NOT_MATCHING</code>)를 감지해 <strong>REJECTED</strong> → 고객 데이터 키를 요청하지 않습니다.</li>
+            </ul>
+            </div>
+            <div data-tab-desc="1" style="display:none">
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">🎥 Scene C GPU CC OFF(Stage 1 서버) 증명 거부</p>
+            <ul class="step-list">
+              <li><span class="n">C</span><strong>GPU CC OFF (거부):</strong> GPU CC가 꺼진 Stage 1 서버에서 같은 증명을 시도합니다. CC 모드가 아닌 GPU는 유효한 SPDM 서명 증거를 생성할 수 없어 증거 수집 단계에서 즉시 <strong>REJECTED</strong>됩니다.</li>
+              <li><span class="n">·</span><strong>의미:</strong> 가짜(에뮬레이션) GPU나 보호가 꺼진 GPU는 정품 보호 GPU로 위장할 수 없습니다.</li>
+            </ul>
+            </div>
+            <div class="callout"><strong>정확한 의미:</strong> 원격 증명은 GPU 자체를 켜는 스위치가 아니라 <strong>"가짜 GPU나 변조된 환경을 걸러내어 검증된 환경에만 고객 데이터 키를 불출하기 위한 관문"</strong>입니다.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 8 -->
+      <section class="slide" data-nav="Stage 3 [CVM ON·GPU CC ON] 외부·디버거 차단">
+        <span class="stage-pill pill-teal">Stage 3 [CVM ON · GPU CC ON] · 외부 인프라(Google) 격리 및 GPU 디버거 차단</span>
+        <h2 class="slide-title">클라우드 인프라(Google) 시점의 격리와 GPU 디버깅 통로 차단</h2>
+        <div class="key-message">
+          VM 밖(하이퍼바이저·호스트)에서는 VM 전용 키가 없어 암호문 노이즈만 보이며, GPU CC 활성 모드는 프로파일러·디버거(CUPTI) 연결도 하드웨어 수준에서 차단합니다.
+        </div>
+
+        <div class="split">
+          <div class="media-card" data-tabs>
+            <div class="tab-bar">
+              <button class="tab-btn active" onclick="switchTab(this, 0)">🎨 VM 내부 vs VM 외부(Google) 시점 비교</button>
+              <button class="tab-btn" onclick="switchTab(this, 1)">🎥 GPU 디버거·프로파일러(CUPTI) 차단 실증</button>
+            </div>
+            <div class="media-pane active">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                <figure style="margin:0">
+                  <figcaption style="font-size:15px;font-weight:700;color:var(--red-700);margin-bottom:8px;text-align:center">VM 안의 서비스 운영자(root)가 보는 메모리</figcaption>
+                  <img src="assets/3_4_vm_inside_plaintext.jpg" alt="VM 내부에서 본 평문 거실 사진" style="width:100%;border-radius:10px;border:3px solid var(--red);display:block" />
+                  <p style="font-size:14px;font-weight:600;color:var(--grey-800);margin:8px 0 0;text-align:center">CPU가 이 VM의 키로 자동 복호화 → <span style="color:var(--red-700)">평문 사진 노출</span></p>
+                </figure>
+                <figure style="margin:0">
+                  <figcaption style="font-size:15px;font-weight:700;color:var(--green-700);margin-bottom:8px;text-align:center">VM 밖(하이퍼바이저·Google)이 보는 메모리</figcaption>
+                  <img src="assets/3_4_vm_outside_ciphertext.png" alt="VM 외부에서 본 암호문 노이즈" style="width:100%;border-radius:10px;border:3px solid var(--green);display:block;image-rendering:pixelated" />
+                  <p style="font-size:14px;font-weight:600;color:var(--grey-800);margin:8px 0 0;text-align:center">VM 전용 키가 없어 <span style="color:var(--green-700)">암호문(노이즈)만 보임</span></p>
+                </figure>
+              </div>
+              <p style="font-size:12.5px;color:var(--yellow-800);background:var(--yellow-50);border-radius:8px;padding:6px 10px;margin:10px 0 0">※ 설명용 그림: 오른쪽은 실제 호스트 메모리 덤프가 아니라, 왼쪽 실제 프레임을 AES로 암호화해 시각화한 것입니다.</p>
+              <div class="media-caption">
+                <span>같은 메모리라도 VM 밖(Google/호스트)에는 키가 없어 암호문 노이즈만 존재 (설명용 시각화)</span>
+                <span class="badge-diagram">설명용 비교 그림</span>
+              </div>
+            </div>
+            <div class="media-pane">
+              <img class="slide-img" src="assets/3_6_gpu_devtools_blocked.jpg" alt="3_6_gpu_devtools_blocked 핵심 장면" />
+              <div class="media-caption">
+                <span><code>DevTools Mode: OFF</code> 상태에서 CUPTI 연결 시도 → <code>CUPTI_ERROR_CONFIDENTIAL_COMPUTING_NOT_SUPPORTED</code> 거부</span>
+                <span class="badge-live">실제 서버 녹화 · 핵심 장면</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <h3>시연 과정 설명</h3>
+            <div data-tab-desc="0">
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">🎨 VM 내부 vs VM 외부(Google) 시점 비교</p>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>같은 메모리, 다른 시점:</strong> VM 안에서는 CPU가 자동 복호화해 원본 사진이 보이지만, VM 밖(호스트·하이퍼바이저)에는 VM 전용 키가 없어 암호문 노이즈만 존재합니다.</li>
+              <li><span class="n">2</span><strong>클라우드 인프라 계층 배제:</strong> Google Cloud 신뢰 경계 정의에 따라 클라우드 관리자, 호스트 OS, 하이퍼바이저, BIOS는 모두 신뢰 경계 밖에 놓입니다.</li>
+            </ul>
+            <div class="callout">이 그림은 클라우드 위에서 직접 재현할 수 없는 호스트 시점을 설명하기 위한 <strong>설명용 시각화</strong>입니다.</div>
+            </div>
+            <div data-tab-desc="1" style="display:none">
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">🎥 GPU 디버거·프로파일러(CUPTI) 차단 실증</p>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>DevTools 모드 확인:</strong> <code>nvidia-smi conf-compute -d</code> 결과 <code>DevTools Mode: OFF</code>가 출력됩니다.</li>
+              <li><span class="n">2</span><strong>디버거 연결 시도 → 거부:</strong> 운영자 권한으로 GPU 성능 카운터·디버거 인터페이스(<code>libcupti</code>) 연결을 시도하면 <code>CUPTI_ERROR_CONFIDENTIAL_COMPUTING_NOT_SUPPORTED</code>(<code>code=41</code>)로 하드웨어 정책에 의해 거부됩니다.</li>
+            </ul>
+            </div>
+            <div class="callout"><strong>남은 질문:</strong> 그렇다면 Stage 3만으로 "서비스 운영자도 고객 영상을 볼 수 없다"고 말할 수 있을까요? 다음 슬라이드에서 확인합니다.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 9 -->
+      <section class="slide" data-nav="Stage 3 [CVM ON·GPU CC ON] 운영자 한계">
+        <span class="stage-pill pill-amber">Stage 3 [CVM ON · GPU CC ON] · 내부 운영자 위협 한계 (Stage 1 vs Stage 3 비교)</span>
+        <h2 class="slide-title">CVM·GPU CC를 켜도 서버 안에 들어온 운영자에게는 여전히 보임</h2>
+        <div class="key-message danger">
+          "Confidential VM은 메모리를 VM 밖(Google)으로부터 암호화합니다. SSH로 VM 안에 들어온 서비스 운영자(root)가 읽을 때는 CPU가 자동 복호화해 주므로 똑같이 사진이 노출됩니다."
+        </div>
+
+        <div class="split">
+          <div class="media-card">
+            <img class="slide-img" src="assets/3_5_side_by_side.jpg" alt="3_5_side_by_side 핵심 장면" />
+            <div class="media-caption">
+              <span>좌: Stage 1(보호 없음) / 우: Stage 3(CVM + GPU 보호) — 두 환경 모두 서버 내부 root 메모리 스캔 시 거실 사진 노출</span>
+              <span class="badge-live">실제 녹화 좌우 비교</span>
+            </div>
+          </div>
+          <div class="info-card">
+            <h3>시연 과정 설명</h3>
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">왜 Stage 4(Confidential Space)가 필수인가?</p>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>동일한 검증 재실행:</strong> CVM(SEV)과 GPU CC가 모두 켜진 Stage 3 서버에서 Stage 1과 동일한 조건으로 점검하자, 2,081 MiB 메모리에서 원본 프레임이 그대로 확인됩니다.</li>
+              <li><span class="n">2</span><strong>이유 (설계상 신뢰 경계):</strong> 하드웨어 메모리 암호화는 노트북 디스크 암호화와 같아서 외부 탈취는 막아주지만, <strong>정상 로그인한 게스트 OS 관리자(<code>root</code>)는 여전히 신뢰 경계 안</strong>에 있기 때문입니다.</li>
+              <li><span class="n">3</span><strong>결론:</strong> "Google은 못 본다"를 넘어 <strong>"서비스 운영자조차 볼 수 없다"</strong>고 선언하려면 운영자의 서버 진입을 막고 검증된 코드에만 키를 주는 <strong>Stage 4</strong>로 가야 합니다.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 10 -->
+      <section class="slide" data-nav="Stage 4 [+Confidential Space] 키 통제">
+        <span class="stage-pill pill-green">Stage 4 [CVM ON · GPU CC ON + Confidential Space] · 증명 기반 KMS 키 통제</span>
+        <h2 class="slide-title">서버가 아닌 '검증된 정품 코드'에만 복호화 키 지급</h2>
+        <div class="key-message success">
+          VM 서비스 계정에서는 키 권한을 완전히 제거하고, Google 증명 서비스가 서명한 5가지 조건을 모두 만족하는 Confidential Space 정품 컨테이너에만 Cloud KMS 키를 열어줍니다.
+        </div>
+
+        <div class="split">
+          <div class="media-card" data-tabs>
+            <div class="tab-bar">
+              <button class="tab-btn active" onclick="switchTab(this, 0)">🎥 5대 증명 조건 &amp; KMS 권한 설정</button>
+              <button class="tab-btn" onclick="switchTab(this, 1)">🎥 Confidential Space 기동 &amp; 정상 추론</button>
+            </div>
+            <div class="media-pane active">
+              <img class="slide-img" src="assets/4_1_key_policy.jpg" alt="4_1_key_policy 핵심 장면" />
+              <div class="media-caption">
+                <span>정품(<code>c352e8...</code>) vs 비승인(<code>086dc0...</code>) 이미지 지문 확인 및 Workload Identity Pool 5대 조건 · KMS IAM 검증</span>
+                <span class="badge-live">실제 정책 녹화</span>
+              </div>
+            </div>
+            <div class="media-pane">
+              <img class="slide-img" src="assets/4_2_cs_boot_genuine.jpg" alt="4_2_cs_boot_genuine 핵심 장면" />
+              <div class="media-caption">
+                <span>서명 드라이버(<code>595.58.03</code>) 자동 적재 → 증명 토큰 발급 → <code>[key] OK</code> → 실시간 추론</span>
+                <span class="badge-live">실제 서버 녹화 · 핵심 장면</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <h3>시연 과정 설명</h3>
+            <div data-tab-desc="0">
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">🎥 5대 증명 조건 &amp; KMS 권한 설정</p>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>정품 vs 비승인 이미지 (상단 창):</strong> 정품 추론 컨테이너(<code>sha256:c352e8...</code>)와 코드 1줄을 바꾼 비승인 컨테이너는 지문(digest)이 서로 다릅니다.</li>
+              <li><span class="n">2</span><strong>키 지급 5대 조건 (좌측 창):</strong> Google 증명 토큰 발급자 · <code>swname == 'CONFIDENTIAL_SPACE'</code> · <code>dbgstat == 'disabled-since-boot'</code> + <code>'STABLE'</code>(운영 이미지) · <code>hwmodel == 'GCP_AMD_SEV'</code> · <code>image_digest == 'sha256:c352e830...'</code>(정품 코드)를 <strong>모두</strong> 만족해야 합니다.</li>
+              <li><span class="n">3</span><strong>KMS 키 권한 대상 (좌측 창):</strong> 복호화 권한(<code>cryptoKeyDecrypter</code>)은 위 조건을 통과한 워크로드(<code>cs-demo-pool/*</code>)에<strong>만</strong> 부여되어 있습니다.</li>
+              <li><span class="n">4</span><strong>VM 서비스 계정 권한 (우측 창):</strong> VM 계정에는 이미지 다운로드·증명 토큰 발급·로그 쓰기 권한만 있고 <strong style="color:var(--red-700)">KMS 권한은 전혀 없습니다.</strong> → 운영자가 VM이나 서비스 계정을 쥐고 있어도 키를 꺼낼 수 없습니다.</li>
+            </ul>
+            <div class="callout"><strong>Stage 1·3과의 차이:</strong> 이전 단계에서는 키 권한이 VM 서비스 계정에 묶여 있어 같은 VM에 올린 백도어 코드도 키를 받을 수 있었습니다. Stage 4에서는 키가 <strong>"서버"가 아니라 "검증된 정품 코드"</strong>에만 지급됩니다.</div>
+            <div style="margin-top:10px;padding:10px 14px;background:var(--yellow-50);border:1px solid #fde293;border-radius:10px;font-size:13px;line-height:1.6;color:var(--grey-800)">
+              <strong>⚠️ 현재 한계 (G4 Confidential Space GA 전):</strong> 키 지급 조건은 CPU(AMD SEV)와 정품 코드만 검증하며, <strong>"정품 GPU + GPU CC ON" 조건은 포함되지 않습니다.</strong> 증명 토큰에 GPU 정보가 아직 없기 때문입니다. GPU 원격 증명은 Stage 3에서 별도로 확인했습니다.<br/>
+              → GA 전에는 정품 코드 안에서 <strong>GPU 원격 증명 통과 후에만 키를 요청</strong>하도록 보완할 수 있습니다.
+            </div>
+            </div>
+            <div data-tab-desc="1" style="display:none">
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">🎥 Confidential Space 기동 &amp; 정상 추론</p>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>자동 부팅:</strong> 사람이 접속해 컨테이너를 띄우지 않습니다. 부팅 시 Confidential Space 런처가 지정된 단일 정품 컨테이너의 지문을 직접 측정해 실행합니다.</li>
+              <li><span class="n">2</span><strong>서명 드라이버 자동 적재:</strong> GPU 드라이버(<code>595.58.03</code>)를 이미지가 자동으로 적재합니다.</li>
+              <li><span class="n">3</span><strong>증명 토큰 → 키 수신:</strong> Google 증명 토큰으로 5대 조건을 통과해 Cloud KMS에서 복호화 키를 받습니다(<code>[key] OK</code>).</li>
+              <li><span class="n">4</span><strong>정상 추론:</strong> 받은 키로 메모리 안에서만 영상을 복호화해 GPU 추론을 정상 수행합니다.</li>
+            </ul>
+            <div style="margin-top:10px;padding:10px 14px;background:var(--grey-50);border:1px solid var(--border);border-radius:10px;font-size:13px;line-height:1.6;color:var(--grey-800)">
+              <div>※ SSH 접속이 차단되어 있어, 서버 밖에서 <strong>시리얼 로그</strong>로 동작을 확인합니다.</div>
+              <div style="margin-top:2px">※ 컨테이너 로그는 이미지 실행 정책으로 허용한 경우에만 출력됩니다. (시연용으로 허용)</div>
+            </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 11 -->
+      <section class="slide" data-nav="Stage 4 [+Confidential Space] 접속 차단">
+        <span class="stage-pill pill-green">Stage 4 [CVM ON · GPU CC ON + Confidential Space] · 운영자 접속 및 명령 변조 차단</span>
+        <h2 class="slide-title">프로젝트 최고 권한 운영자라도 서버 진입 및 실행 명령 변경 불가</h2>
+        <div class="key-message success">
+          "운영 이미지에는 원격 접속 기능 자체가 없으며, 메타데이터로 시작 명령(<code>tee-cmd</code>)을 바꿔도 런처가 실행 정책 위반으로 컨테이너 실행을 거부하고 서버를 종료합니다."
+        </div>
+
+        <div class="split">
+          <div class="media-card" data-tabs>
+            <div class="tab-bar">
+              <button class="tab-btn active" onclick="switchTab(this, 0)">🎥 운영자 원격 접속 시도 → 차단</button>
+              <button class="tab-btn" onclick="switchTab(this, 1)">🎥 <code>tee-cmd</code>로 시작 명령 변경 → 런처가 실행 거부</button>
+            </div>
+            <div class="media-pane active">
+              <img class="slide-img" src="assets/4_3_ssh_blocked.jpg" alt="4_3_ssh_blocked 핵심 장면" />
+              <div class="media-caption">
+                <span>운영자 SSH 접속 시도 → 원격 접속 기능이 없어 타임아웃·거부 (<code>return code [255]</code>)</span>
+                <span class="badge-live">실제 서버 녹화 · 핵심 장면</span>
+              </div>
+            </div>
+            <div class="media-pane">
+              <img class="slide-img" src="assets/4_4_cmd_override_blocked.jpg" alt="4_4_cmd_override_blocked 핵심 장면" />
+              <div class="media-caption">
+                <span><code>tee-cmd=["/bin/sh"]</code> 주입 후 재시작 시 <code>CMD is not allowed to be overridden on this image</code> 출력 후 즉시 종료</span>
+                <span class="badge-live">실제 서버 녹화 · 핵심 장면</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <h3>시연 과정 설명</h3>
+            <div data-tab-desc="0">
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">🎥 운영자 원격 접속 시도 → 차단</p>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>SSH 접속 시도:</strong> 추론이 정상 동작 중인 Stage 4 인스턴스(좌측 창)에 프로젝트 소유자 권한의 서비스 운영자가 SSH 접속을 시도합니다.</li>
+              <li><span class="n">2</span><strong>결과:</strong> 운영 이미지에는 원격 접속 기능과 쉘 진입 경로가 없어 접속이 타임아웃되고 거부됩니다(<code>return code [255]</code>). 좌측 창의 추론은 영향 없이 계속됩니다.</li>
+            </ul>
+            </div>
+            <div data-tab-desc="1" style="display:none">
+            <p style="font-size:13px;font-weight:600;color:var(--grey-700);margin:0 0 6px">🎥 tee-cmd로 시작 명령 변경 → 런처가 실행 거부</p>
+            <table style="width:100%;border-collapse:collapse;font-size:13px;margin:0 0 10px">
+              <thead><tr style="background:var(--grey-50)"><th style="text-align:left;padding:6px 8px;border:1px solid var(--border)">구분</th><th style="text-align:left;padding:6px 8px;border:1px solid var(--border)">VM 메타데이터 <code>tee-cmd</code></th><th style="text-align:left;padding:6px 8px;border:1px solid var(--border)">실제 시작 명령</th></tr></thead>
+              <tbody>
+                <tr><td style="padding:6px 8px;border:1px solid var(--border)"><strong style="color:var(--green-700)">원래 (정품)</strong></td><td style="padding:6px 8px;border:1px solid var(--border)">없음</td><td style="padding:6px 8px;border:1px solid var(--border)">이미지에 고정된 <code>python /app/server.py</code> (추론 서버)</td></tr>
+                <tr><td style="padding:6px 8px;border:1px solid var(--border)"><strong style="color:var(--red-700)">변경 시도</strong></td><td style="padding:6px 8px;border:1px solid var(--border)"><code>["/bin/sh"]</code></td><td style="padding:6px 8px;border:1px solid var(--border)">쉘로 바꿔 실행 시도 → <strong style="color:var(--red-700)">런처가 거부</strong></td></tr>
+              </tbody>
+            </table>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>메타데이터 변경은 가능:</strong> 운영자가 정품 이미지 지문은 그대로 둔 채 VM 메타데이터에 <code>tee-cmd=["/bin/sh"]</code>를 추가하고 재시작합니다. 메타데이터 수정 자체는 정상 완료됩니다.</li>
+              <li><span class="n">2</span><strong>런처가 실행 정책 위반 감지:</strong> 부팅 시 Confidential Space 런처가 이미지에 고정된 실행 정책(명령 변경 불허)과 대조해 <code>CMD is not allowed to be overridden on this image</code>를 출력합니다.</li>
+              <li><span class="n">3</span><strong>컨테이너 미실행, VM 종료:</strong> 컨테이너를 띄우지 않고 VM이 즉시 종료됩니다.</li>
+            </ul>
+            <div class="callout">운영자는 설정을 <strong>바꿀 수는 있지만</strong>, 바꾼 설정으로 정품 코드를 다른 방식으로 실행할 수는 없습니다. 할 수 있는 건 서비스 중단뿐이고, 영상 열람은 불가능합니다.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 12 -->
+      <section class="slide" data-nav="Stage 4 [+Confidential Space] 변조 코드 거부">
+        <span class="stage-pill pill-green">Stage 4 [CVM ON · GPU CC ON + Confidential Space] · 비승인 컨테이너 키 발급 거부</span>
+        <h2 class="slide-title">코드를 단 한 줄만 바꿔도 복호화 키가 열리지 않음</h2>
+        <div class="key-message success">
+          "서비스 운영자가 사진을 외부로 빼돌리는 코드 1줄을 추가해 배포하더라도, 컨테이너 지문이 바뀌어 키 발급이 즉시 거부(403)되며 유출된 데이터 역시 암호문 노이즈뿐입니다."
+        </div>
+
+        <div class="split">
+          <div class="media-card">
+            <img class="slide-img" src="assets/4_5_unapproved_container_denied.jpg" alt="4_5_unapproved_container_denied 핵심 장면" />
+            <div class="media-caption">
+              <span>좌: 지문 불일치로 STS/KMS 키 거부(<code>rejected by the attribute condition</code>) / 우: 공격자 수신 서버에 도착한 암호문 노이즈</span>
+              <span class="badge-live">실제 서버 녹화 · 핵심 장면</span>
+            </div>
+          </div>
+          <div class="info-card">
+            <h3>시연 과정 설명</h3>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>인증받지 않은 컨테이너 배포:</strong> 정품 추론 코드에 외부 수신 서버(<code>9100</code>번 포트)로 프레임을 전송하는 코드 단 1줄만 추가해 빌드하고 Confidential Space에 배포합니다.</li>
+              <li><span class="n">2</span><strong>부팅은 허용하되 정직하게 지문 기록:</strong> Confidential Space는 컨테이너를 실행하지만, 런처가 측정한 실제 지문(<code>sha256:d40b116b...</code>)을 Google 증명 토큰에 그대로 기록합니다.</li>
+              <li><span class="n">3</span><strong>STS/KMS 단계에서 키 불출 원천 거부:</strong> 컨테이너가 키를 요청하는 순간 정품 지문(<code>sha256:c352e830...</code>)과 불일치하여 <code>The given credential is rejected by the attribute condition</code> 에러로 거부됩니다.</li>
+              <li><span class="n">4</span><strong>유출 데이터 무력화:</strong> 키가 없으므로 메모리에는 평문 사진이 생성조차 되지 않으며, 공격자 수신 서버가 받은 파일(<code>147,228 bytes</code>)은 <code>NOT a JPEG (encrypted)</code> — 즉 복호화 불가능한 암호문 노이즈뿐입니다.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 13 -->
+      <section class="slide" data-nav="결론 · 단계별 요약 및 선언 가이드">
+        <span class="stage-pill pill-purple">Conclusion · 최종 비교 요약 및 고객 커뮤니케이션 가이드</span>
+        <h2 class="slide-title">4단계 실증 결과 종합 및 보안 선언 가이드</h2>
+        <div class="key-message success">
+          하드웨어 기밀 컴퓨팅(Stage 3: <code>CVM ON · GPU CC ON</code>)에 Confidential Space와 증명 기반 키 통제(Stage 4)를 결합하면, "고객 외에는 서비스 운영자도, 클라우드 사업자도 원본 영상을 볼 수 없다"는 기술적 근거가 완성됩니다.
+        </div>
+
+        <table class="matrix" style="margin-bottom:20px">
+          <thead>
+            <tr>
+              <th>검증 항목</th>
+              <th>Stage 1<br/><span style="font-weight:500;color:var(--muted)">CVM OFF · GPU CC OFF</span></th>
+              <th>Stage 3<br/><span style="font-weight:500;color:var(--muted)">CVM ON · GPU CC ON</span></th>
+              <th style="color:var(--green-700);background:var(--green-50)">Stage 4<br/><span style="font-weight:600;color:var(--green-700)">CVM ON · GPU CC ON + Confidential Space</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CPU 메모리 &amp; CPU↔GPU 전송 보호</strong></td>
+              <td class="status-bad">평문 (보호 없음)</td>
+              <td class="status-good">AMD SEV + AES-256-GCM</td>
+              <td class="status-good" style="background:rgb(230 244 234 / .35)">AMD SEV + AES-256-GCM</td>
+            </tr>
+            <tr>
+              <td><strong>GPU 진위 증명 &amp; 디버거 차단</strong></td>
+              <td class="status-bad">증명 거부 (<code>CC OFF</code>)</td>
+              <td class="status-good">NVIDIA NRAS 통과 · CUPTI 차단</td>
+              <td class="status-good" style="background:rgb(230 244 234 / .35)">서명 드라이버 자동 적재 · 격리</td>
+            </tr>
+            <tr>
+              <td><strong>서비스 운영자 서버 내부 메모리 접근</strong></td>
+              <td class="status-bad">원본 사진 100% 노출</td>
+              <td class="status-bad">원본 사진 100% 노출</td>
+              <td class="status-good" style="background:rgb(230 244 234 / .35)">원격 접속 제거 · <code>tee-cmd</code> 차단</td>
+            </tr>
+            <tr>
+              <td><strong>비승인 코드 배포 시 영상 유출</strong></td>
+              <td class="status-bad">VM 서비스 계정으로 키 획득</td>
+              <td class="status-bad">VM 서비스 계정으로 키 획득</td>
+              <td class="status-good" style="background:rgb(230 244 234 / .35)">지문 불일치로 키 거부 · 암호문만 존재</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="split" style="grid-template-columns:1fr 1fr">
+          <div class="info-card">
+            <h3>구축 단계별 권장 대외 메시지</h3>
+            <p style="font-size:14px;margin-bottom:12px"><strong style="color:var(--blue-700)">● Stage 3 구축 시 (Confidential VM / GKE):</strong><br/>
+            "영상이 분석되는 연산 순간(Data-in-use)까지 CPU 메모리와 GPU 전송 구간을 하드웨어로 보호하여, <strong>클라우드 인프라 사업자를 포함한 외부 계층으로부터 고객 데이터를 철저히 격리</strong>합니다."</p>
+            <p style="font-size:14px"><strong style="color:var(--green-700)">● Stage 4 구축 시 (+ Confidential Space &amp; 증명 기반 키):</strong><br/>
+            "암호화된 영상은 무결성이 증명된 AI 분석 엔진 내부 메모리에서만 복호화 후 즉시 소멸되며, <strong>고객 본인을 제외하고는 클라우드 사업자는 물론 서비스를 운영하는 시스템 관리자조차 원본 영상에 접근할 수 없도록 기술적으로 차단</strong>되어 있습니다."</p>
+          </div>
+          <div class="info-card">
+            <h3>상용 서비스 적용 시 아키텍처 체크포인트</h3>
+            <ul class="step-list">
+              <li><span class="n">1</span><strong>단말(카메라) 측 암호화 유지:</strong> 영상이 서버에 도달하기 전 카메라에서 암호화되어야 Stage 4의 증명 기반 키 통제가 유효하게 작동합니다.</li>
+              <li><span class="n">2</span><strong>키 관리 권한 분리:</strong> 상용 환경에서는 서비스 운영자가 KMS 권한 조건을 임의로 완화하지 못하도록 키 관리 프로젝트를 분리하거나 고객/독립 보안 조직 통제하에 운영하는 구성을 권장합니다.</li>
+              <li><span class="n">3</span><strong>멀티모델 단일 컨테이너 패키징:</strong> Confidential Space는 VM당 검증된 단일 컨테이너를 실행하므로, 다중 AI 모델 서빙 시 Triton Inference Server 또는 통합 파이프라인 컨테이너로 구성합니다.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+<div id="lightbox" onclick="closeLightbox()"><span class="lb-hint">클릭 또는 Esc로 닫기</span><img id="lightboxImg" alt="확대 이미지" /></div>
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const navList = document.getElementById('navList');
+    const counter = document.getElementById('slideCounter');
+    const progressFill = document.getElementById('progressFill');
+    let current = 0;
+
+    slides.forEach((s, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'nav-item' + (idx === 0 ? ' active' : '');
+      btn.innerHTML = `<span class="nav-num">${idx + 1}</span><span>${s.dataset.nav}</span>`;
+      btn.onclick = () => goTo(idx);
+      navList.appendChild(btn);
+    });
+
+    function pauseAllVideos() {
+      document.querySelectorAll('video').forEach(v => v.pause());
+    }
+
+    function goTo(idx) {
+      if (idx < 0 || idx >= slides.length) return;
+      pauseAllVideos();
+      slides[current].classList.remove('active');
+      navList.children[current].classList.remove('active');
+      current = idx;
+      slides[current].classList.add('active');
+      navList.children[current].classList.add('active');
+      navList.children[current].scrollIntoView({ block: 'nearest' });
+      counter.textContent = `${current + 1} / ${slides.length}`;
+      progressFill.style.width = `${((current + 1) / slides.length) * 100}%`;
+      document.querySelector('.slide-viewport').scrollTop = 0;
+    }
+
+    function nextSlide() { goTo(current + 1); }
+    function prevSlide() { goTo(current - 1); }
+    function toggleSidebar() { document.body.classList.toggle('hide-sidebar'); }
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+
+    function switchTab(btn, paneIdx) {
+      pauseAllVideos();
+      const card = btn.closest('[data-tabs]');
+      card.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === paneIdx));
+      card.querySelectorAll('.media-pane').forEach((p, i) => p.classList.toggle('active', i === paneIdx));
+      const slide = btn.closest('.slide');
+      if (slide) {
+        slide.querySelectorAll('[data-tab-desc]').forEach(d => {
+          d.style.display = Number(d.dataset.tabDesc) === paneIdx ? '' : 'none';
+        });
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+      else if (e.key === 'b' || e.key === 'B') toggleSidebar();
+      else if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+    });
+
+    function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+    document.addEventListener('click', (e) => {
+      const img = e.target.closest('.media-card img');
+      if (!img) return;
+      document.getElementById('lightboxImg').src = img.src;
+      document.getElementById('lightbox').classList.add('open');
+    });
+    document.addEventListener('keydown', (e) => {
+      if (document.getElementById('lightbox').classList.contains('open')) {
+        if (e.key === 'Escape') closeLightbox();
+        e.stopImmediatePropagation();
+      }
+    }, true);
+  </script>
+</body>
+</html>
